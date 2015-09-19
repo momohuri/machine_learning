@@ -2,26 +2,24 @@
 object batch_gradient_descent {
   var O0: Double = 0
   var O1: Double = 0
-
   val learningRate = 0.001
 
   def with_one_variable(trainingData: Map[Int, Int]): (Double, Double, Double, Int) = {
     var previousResult: Double = cost_function(trainingData)
     var currentResult = 0.0
     var iterations = 0
-    while (previousResult != currentResult) {
+    while (previousResult != currentResult && iterations < 1000000) {
       iterations += 1
       previousResult = cost_function(trainingData)
-      val sumOfDifference = trainingData.foldLeft(0.0) { case (sum, (key, value)) =>
-        sum + hypothesis(key) - value
-      }
-      val sumOfDifferenceMultipliedByKey = trainingData.foldLeft(0.0) { case (sum, (key, value)) =>
-        sum + (hypothesis(key) - value).toInt * key
-      }
+      val sumOfDifference = trainingData.map { case (xi, yi) =>
+        hypothesis(xi) - yi
+      }.sum
+      val sumOfDifferenceMultipliedByKey = trainingData.map { case (xi, yi) =>
+        (hypothesis(xi) - yi).toInt * xi
+      }.sum
 
       O0 = O0 - learningRate * (1 / trainingData.size.toDouble) * sumOfDifference
       O1 = O1 - learningRate * (1 / trainingData.size.toDouble) * sumOfDifferenceMultipliedByKey
-
 
       currentResult = cost_function(trainingData)
     }
@@ -42,6 +40,6 @@ object batch_gradient_descent {
 
 }
 
-val trainingData = Map(0 -> 1, 2 -> 5, 5 -> 12)
+val trainingData = Map(0 -> 1, 1 -> 4, 2 -> 7, 5 -> 16)
 val result = batch_gradient_descent.with_one_variable(trainingData)
 print(result)
